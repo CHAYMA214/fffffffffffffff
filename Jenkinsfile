@@ -6,6 +6,7 @@ pipeline {
         APP_STAGING_URL     = 'http://localhost:5000'
         SONAR_TOKEN         = credentials('sonar-token')
         GITHUB_TOKEN        = credentials('github-token')
+        SONAR_HOST_URL_OVERRIDE = 'http://10.108.104.130:9000'
     }
 
     options {
@@ -86,7 +87,8 @@ pipeline {
                         withSonarQubeEnv('SonarQube') {
                             sh """
                                 docker run --rm \
-                                    -e SONAR_HOST_URL=\${SONAR_HOST_URL} \
+                                    --network host \
+                                    -e SONAR_HOST_URL=http://10.108.104.130:9000 \
                                     -e SONAR_TOKEN=${SONAR_TOKEN} \
                                     -v \$(pwd):/usr/src \
                                     sonarsource/sonar-scanner-cli \
