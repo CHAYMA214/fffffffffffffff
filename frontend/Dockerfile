@@ -1,10 +1,12 @@
-FROM node:20
-WORKDIR /usr/src/app
-ENV node_ENV=production 
+FROM node:alpine AS builder
+WORKDIR /app
 COPY package*.json ./
-RUN --mount=type=cache,target=/usr/src/app/.npm \
-  npm set cache /usr/src/app/.npm && \
-  npm ci --omit=dev --legacy-peer-deps
-COPY --chown=node:node . .
-EXPOSE 3000
-CMD ["npm", "start"]
+COPY . .
+RUN npm ci --legacy-peer-deps && \
+    npm run build && \
+    npm cache clean --force
+FROM nginx:alpine
+COPY --from=builder /app/build /usr/share/nginx/html
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

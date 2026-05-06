@@ -1,23 +1,10 @@
-FROM node:20
-
-WORKDIR /usr/src/app
-
-ENV NODE_ENV=production
-
+FROM node:alpine
+WORKDIR /app
 COPY package*.json ./
-
-# Install only production dependencies and ignore peer conflicts
-RUN --mount=type=cache,target=/usr/src/app/.npm \
-    npm set cache /usr/src/app/.npm && \
-    npm ci --only=production --legacy-peer-deps
-
-# Set user
-USER node
-
-# Copy the app source code
-COPY --chown=node:node . .
-
+COPY . .
+RUN npm ci --legacy-peer-deps && npm prune --production --legacy-peer-deps && npm cache clean --force
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001 && chown -R nodejs:nodejs /app
+USER nodejs
 EXPOSE 3000
-
+ENV NODE_ENV=production
 CMD ["node", "app.js"]
-#kckcjskj
