@@ -1,0 +1,33 @@
+services:
+  backend:
+    image: firstdock:3
+    build: ./backend
+    ports:
+      - "5000:3000"
+    env_file:
+      - .env
+    environment:
+      NODE_ENV: ${NODE_ENV}
+      MONGO_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongodb:27017/${MONGO_DB}
+    depends_on:
+      - mongodb
+
+  frontend:
+    image: frontenddock:0
+    build: ./frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  mongodb:
+    image: mongo:6
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_DATABASE: ${MONGO_DB}
+    volumes:
+      - mongodb_data:/data/db
+
+volumes:
+  mongodb_data:

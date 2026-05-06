@@ -1,0 +1,57 @@
+.button-group {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transform: translateY(-50%);
+    z-index: 1000;
+  }
+  
+  .iconStyle {
+    background: white;
+    border: none;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+  .user-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.user-icon {
+  font-size: 24px;
+  cursor: pointer;
+  margin-left: 10px;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 10px;
+  z-index: 1000;
+  min-width: 180px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+.iconStyle {
+  font-size: 24px;
+  color: #333;
+  cursor: pointer;
+}
+
+.user-icon {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+}

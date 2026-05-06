@@ -1,0 +1,23 @@
+.page-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 300px;
+    background: #f9f9f9;
+    padding: 16px;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+  }
+  
+  .map-area {
+    flex: 1;
+    position: relative;
+  }
+  
+  .leaflet-container {
+    height: 100%;
+    width: 100%;
+  }
+  
