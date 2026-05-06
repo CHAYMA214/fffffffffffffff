@@ -35,6 +35,8 @@
     "uuid": "^11.1.0"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "eslint-plugin-security": "^3.0.0"
+
   }
 }
