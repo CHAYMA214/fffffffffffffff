@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "types": "module",
-  "proxy": "http://localhost:3001",
+  "proxy": "http://localhost:3000",
   "dependencies": {
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
