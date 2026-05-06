@@ -76,16 +76,12 @@ pipeline {
                         '''
                     }
                     post {
-                        always {
-                            publishHTML(target: [
-                                allowMissing: false,
-                                alwaysLinkToLastBuild: true,
-                                keepAll: true,
-                                reportDir: 'reports/dependency-check',
-                                reportFiles: 'dependency-check-report.html',
-                                reportName: 'OWASP Dependency Check'
-                            ])
+                      always {
+                        node {
+                         sh 'docker-compose down --remove-orphans || true'
+                         archiveArtifacts artifacts: 'reports/**/*', allowEmptyArchive: true
                         }
+                     }
                     }
                 }
 
