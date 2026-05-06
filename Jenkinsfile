@@ -324,7 +324,7 @@ pipeline {
                     URL: ${env.BUILD_URL}
                     Consultez les rapports SAST/DAST dans les artefacts.
                 """,
-                to: 'votre-email@domaine.com'
+                to: 'Chaymabakloutoi59@gmail.com'
             )
         }
     }
