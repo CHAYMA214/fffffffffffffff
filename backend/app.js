@@ -34,7 +34,7 @@ app.use((req, res, next) => {
   const error = new HttpError('Could not find this route.', 404);
   throw error;
 });
-mongoose.connect(process.env.MONGO_URL || 'mongodb://pipeline-mongodb-1:27017/mern')  .then(()=>{app.listen(3001);})
+mongoose.connect(process.env.MONGO_URL || 'MONGO_URI=mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:27017/${MONGO_DB}?authSource=admin')  .then(()=>{app.listen(3001);})
 .catch(err=>{
   console.log(err);
 });
