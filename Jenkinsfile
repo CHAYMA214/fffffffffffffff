@@ -2,15 +2,10 @@ pipeline {
     agent any
 
     environment {
-        // SonarQube
-        SONAR_PROJECT_KEY       = 'mern-app'
-
-        // URL de l'app déployée (pour DAST)
-        APP_STAGING_URL         = 'http://localhost:5000'
-
-        // Credentials Jenkins (à créer dans Jenkins > Credentials)
-        SONAR_TOKEN             = credentials('sonar-token')
-        GITHUB_TOKEN            = credentials('github-token')
+        SONAR_PROJECT_KEY   = 'mern-app'
+        APP_STAGING_URL     = 'http://localhost:5000'
+        SONAR_TOKEN         = credentials('sonar-token')
+        GITHUB_TOKEN        = credentials('github-token')
     }
 
     options {
@@ -33,20 +28,21 @@ pipeline {
 
         // ─────────────────────────────────────────
         // STAGE 2 — Install Dependencies
+        // ✅ FIX: npm ci → npm ci --legacy-peer-deps
         // ─────────────────────────────────────────
         stage('Install Dependencies') {
             parallel {
                 stage('Backend deps') {
                     steps {
                         dir('backend') {
-                            sh 'npm ci'
+                            sh 'npm ci --legacy-peer-deps'
                         }
                     }
                 }
                 stage('Frontend deps') {
                     steps {
                         dir('frontend') {
-                            sh 'npm ci'
+                            sh 'npm ci --legacy-peer-deps'
                         }
                     }
                 }
@@ -62,6 +58,7 @@ pipeline {
                 stage('Dependency Check') {
                     steps {
                         sh '''
+                            mkdir -p reports/dependency-check
                             docker run --rm \
                                 -v $(pwd):/src \
                                 -v $(pwd)/reports/dependency-check:/report \
@@ -75,13 +72,12 @@ pipeline {
                                 --enableRetired
                         '''
                     }
+                    // ✅ FIX: removed invalid node{} wrapper inside stage post
                     post {
-                      always {
-                        node {
-                         sh 'docker-compose down --remove-orphans || true'
-                         archiveArtifacts artifacts: 'reports/**/*', allowEmptyArchive: true
+                        always {
+                            archiveArtifacts artifacts: 'reports/dependency-check/**/*',
+                                             allowEmptyArchive: true
                         }
-                     }
                     }
                 }
 
@@ -150,9 +146,7 @@ pipeline {
         // ─────────────────────────────────────────
         stage('Build Docker Images') {
             steps {
-                sh '''
-                    docker-compose build --no-cache
-                '''
+                sh 'docker-compose build --no-cache'
             }
         }
 
@@ -257,18 +251,18 @@ pipeline {
                     }
                 }
 
+                // ✅ FIX: replaced docker cp with volume mount (reliable for exited containers)
                 stage('Nikto') {
                     steps {
                         sh '''
                             mkdir -p reports/nikto
                             docker run --rm \
                                 --network host \
+                                -v $(pwd)/reports/nikto:/tmp/reports \
                                 sullo/nikto \
                                 -h ${APP_STAGING_URL} \
                                 -Format htm \
-                                -output /tmp/nikto-report.html
-                            docker cp $(docker ps -lq):/tmp/nikto-report.html \
-                                reports/nikto/nikto-report.html || true
+                                -output /tmp/reports/nikto-report.html
                         '''
                     }
                 }
