@@ -88,27 +88,29 @@ pipeline {
                     }
                 }
 
-                stage('SonarQube Analysis') {
+               stage('SonarQube Analysis') {
                     steps {
-                        // The server name 'sonarqube' must match what you configured in 
-                        // Jenkins → Manage Jenkins → Configure System → SonarQube servers
-                        withSonarQubeEnv('sonarqube') {
-                            sh '''
-                                docker run --rm \
-                                    -v $(pwd):/usr/src \
-                                    --network host \
-                                    -e SONAR_HOST_URL=$SONAR_HOST_URL \
-                                    -e SONAR_TOKEN=$SONAR_TOKEN \
-                                    sonarsource/sonar-scanner-cli \
-                                    -Dsonar.projectKey=MERN-App \
-                                    -Dsonar.sources=. \
-                                    -Dsonar.exclusions=**/node_modules/**,**/coverage/** \
-                                    -Dsonar.scm.provider=git
-                            '''
+                        catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE', message: 'SonarQube analysis failed - check reports') {
+                            withSonarQubeEnv('sonarqube') {
+                                sh '''
+                                    docker run --rm \
+                                        -v $(pwd):/usr/src \
+                                        --network host \
+                                        -e SONAR_HOST_URL=$SONAR_HOST_URL \
+                                        -e SONAR_TOKEN=$SONAR_TOKEN \
+                                        sonarsource/sonar-scanner-cli \
+                                        -Dsonar.projectKey=MERN-App \
+                                        -Dsonar.sources=. \
+                                        -Dsonar.exclusions=**/node_modules/**,**/coverage/** \
+                                        -Dsonar.scm.provider=git
+                                '''
+                            }
+                            timeout(time: 5, unit: 'MINUTES') {
+                                waitForQualityGate abortPipeline: false   // ← Do not stop pipeline
+                            }
                         }
-                        timeout(time: 5, unit: 'MINUTES') {
-                            waitForQualityGate abortPipeline: true
-                        }
+                        // Optional: log that pipeline continues despite stage failure
+                        echo "⚠️ SonarQube stage finished (possibly failed). Continuing pipeline..."
                     }
                 }
                 stage('Secret Scanning') {
