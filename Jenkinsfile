@@ -90,18 +90,17 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        withSonarQubeEnv('SonarQube') {
-                            sh """
+                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
+                            sh '''
                                 docker run --rm \
                                     --network host \
-                                    -e SONAR_HOST_URL=http://10.108.104.130:9000 \
-                                    -e SONAR_TOKEN=${SONAR_TOKEN} \
-                                    -v \$(pwd):/usr/src \
+                                    -e SONAR_HOST_URL=$SONAR_HOST_URL_OVERRIDE \
+                                    -e SONAR_TOKEN=$SONAR_TOKEN \
                                     sonarsource/sonar-scanner-cli \
-                                    -Dsonar.projectKey=${SONAR_PROJECT_KEY} \
+                                    -Dsonar.projectKey=MERN-App \
                                     -Dsonar.sources=. \
                                     -Dsonar.exclusions=**/node_modules/**,**/coverage/**
-                            """
+                               '''
                         }
                         timeout(time: 5, unit: 'MINUTES') {
                             waitForQualityGate abortPipeline: true
