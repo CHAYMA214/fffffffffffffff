@@ -90,24 +90,30 @@ pipeline {
 
                 stage('SonarQube Analysis') {
                     steps {
-                        withCredentials([string(credentialsId: 'sonar-token', variable: 'SONAR_TOKEN')]) {
-                            sh '''
-                                docker run --rm \
-                                    --network host \
-                                    -e SONAR_HOST_URL=$SONAR_HOST_URL_OVERRIDE \
-                                    -e SONAR_TOKEN=$SONAR_TOKEN \
-                                    sonarsource/sonar-scanner-cli \
-                                    -Dsonar.projectKey=MERN-App \
-                                    -Dsonar.sources=. \
-                                    -Dsonar.exclusions=**/node_modules/**,**/coverage/**
-                               '''
+                        script {
+                            // The SonarQube server must be configured in Jenkins 
+                            // (Manage Jenkins → Configure System → SonarQube servers)
+                            // with the URL and token. Use the configured server name, e.g. 'my-sonarqube'
+                            withSonarQubeEnv('my-sonarqube') {
+                                sh '''
+                                    docker run --rm \
+                                        -v $(pwd):/usr/src \
+                                        --network host \
+                                        -e SONAR_HOST_URL=$SONAR_HOST_URL \
+                                        -e SONAR_TOKEN=$SONAR_TOKEN \
+                                        sonarsource/sonar-scanner-cli \
+                                        -Dsonar.projectKey=MERN-App \
+                                        -Dsonar.sources=. \
+                                        -Dsonar.exclusions=**/node_modules/**,**/coverage/**
+                                '''
+                            }
                         }
                         timeout(time: 5, unit: 'MINUTES') {
+                            // The plugin automatically picks up the task ID from the previous analysis
                             waitForQualityGate abortPipeline: true
                         }
                     }
                 }
-
                 stage('Secret Scanning') {
                     steps {
                         sh '''
